@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prescription Request</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background: #ffffff;
+            padding: 20px 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            text-align: center;
+        }
+        .logo img {
+            width: 150px;
+            height: auto;
+            margin-bottom: -10px;
+        }
+        h1 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: #333333;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            font-size: 0.9rem;
+            margin: 10px 0 5px;
+            text-align: left;
+        }
+        input, textarea {
+            padding: 10px;
+            font-size: 1rem;
+            border: 1px solid #cccccc;
+            border-radius: 5px;
+        }
+        textarea {
+            resize: vertical; /* Allow vertical resizing only */
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .error, .response {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .error {
+            color: #ffffff;
+            background-color: #e74c3c;
+        }
+        .response {
+            color: #000000;
+            background-color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Logo Section -->
+        <div class="logo">
+            <img src="image.png" alt="Logo">
+        </div>
+        <!-- Form Section -->
+        <h1>How can I assist you?</h1>
+        <form id="prescriptionForm">
+            <label for="chat">Message:</label>
+            <textarea 
+                id="chat" 
+                name="chat" 
+                rows="4" 
+                placeholder="What's my prescription dosage?" 
+                required></textarea>
+        
+            <label for="nhs_number">NHS number:</label>
+            <input 
+                type="text" 
+                id="nhs_number" 
+                name="nhs_number" 
+                placeholder="Enter your NHS number" 
+                required>
+                
+            <label for="phone_number">Phone number:</label>
+            <input 
+                type="text" 
+                id="phone_number" 
+                name="phone_number" 
+                placeholder="Enter your phone number" 
+                required>
+            
+            <button type="submit">Send Request</button>
+        </form>        
+    </div>
+
+    <script>
+        document.getElementById("prescriptionForm").addEventListener("submit", function(event) {
+            event.preventDefault(); // Prevent normal form submission
+
+            const chat = document.getElementById("chat").value.trim();
+            const nhs_number = document.getElementById("nhs_number").value.trim();
+            const phone_number = document.getElementById("phone_number").value.trim();
+
+            const errorDiv = document.getElementById("error");
+            const responseDiv = document.getElementById("response");
+
+            errorDiv.style.display = "none"; // Hide error message
+            responseDiv.style.display = "none"; // Hide response message
+
+            // Simple Validation
+            if (!chat || !nhs_number || !phone_number) {
+                errorDiv.textContent = "All fields are required.";
+                errorDiv.style.display = "block";
+                return;
+            }
+            if (!/^\d+$/.test(nhs_number)) {
+                errorDiv.textContent = "NHS Number must contain only digits.";
+                errorDiv.style.display = "block";
+                return;
+            }
+            if (!/^\+?\d{10,15}$/.test(phone_number)) {
+                errorDiv.textContent = "Phone Number must be a valid format (e.g., +1234567890).";
+                errorDiv.style.display = "block";
+                return;
+            }
+
+            const requestPayload = {
+                chat: chat,
+                nhs_number: nhs_number,
+                phone_number: phone_number
+            };
+
+            console.log("Request Payload:", JSON.stringify(requestPayload));
+
+            fetch("https://hillda-stg2-g2agg5ejgcdddje3.canadacentral-01.azurewebsites.net/chat/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(requestPayload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display success response
+                responseDiv.textContent = "Response: " + JSON.stringify(data);
+                responseDiv.style.display = "block";
+            })
+            .catch(error => {
+                // Display error response
+                console.error("Error:", error);
+                errorDiv.textContent = "Error: " + error.message;
+                errorDiv.style.display = "block";
+            });
+        });
+    </script>
+</body>
+</html>
