@@ -78,6 +78,15 @@
             color: #000000;
             background-color: #ffffff;
         }
+        /* Loading spinner */
+        #loading {
+            display: none;
+            margin-top: 20px;
+        }
+        #loading img {
+            width: 30px;
+            height: 30px;
+        }
     </style>
 </head>
 <body>
@@ -114,7 +123,17 @@
                 required>
             
             <button type="submit">Send Request</button>
-        </form>        
+        </form> 
+
+        <!-- Loading Spinner -->
+        <div id="loading">
+            <img src="https://i.imgur.com/llF5t4w.gif" alt="Loading...">
+            <p>Loading...</p>
+        </div>
+        
+        <!-- Error and Response Divs -->
+        <div id="error" class="error" style="display:none;"></div>
+        <div id="response" class="response" style="display:none;"></div>
     </div>
 
     <script>
@@ -127,24 +146,29 @@
 
             const errorDiv = document.getElementById("error");
             const responseDiv = document.getElementById("response");
+            const loadingDiv = document.getElementById("loading");
 
             errorDiv.style.display = "none"; // Hide error message
             responseDiv.style.display = "none"; // Hide response message
+            loadingDiv.style.display = "block"; // Show loading spinner
 
             // Simple Validation
             if (!chat || !nhs_number || !phone_number) {
                 errorDiv.textContent = "All fields are required.";
                 errorDiv.style.display = "block";
+                loadingDiv.style.display = "none"; // Hide loading spinner
                 return;
             }
             if (!/^\d+$/.test(nhs_number)) {
                 errorDiv.textContent = "NHS Number must contain only digits.";
                 errorDiv.style.display = "block";
+                loadingDiv.style.display = "none"; // Hide loading spinner
                 return;
             }
             if (!/^\+?\d{10,15}$/.test(phone_number)) {
                 errorDiv.textContent = "Phone Number must be a valid format (e.g., +1234567890).";
                 errorDiv.style.display = "block";
+                loadingDiv.style.display = "none"; // Hide loading spinner
                 return;
             }
 
@@ -165,11 +189,15 @@
             })
             .then(response => response.json())
             .then(data => {
+                // Hide loading spinner
+                loadingDiv.style.display = "none";
                 // Display success response
                 responseDiv.textContent = "Response: " + JSON.stringify(data);
                 responseDiv.style.display = "block";
             })
             .catch(error => {
+                // Hide loading spinner
+                loadingDiv.style.display = "none";
                 // Display error response
                 console.error("Error:", error);
                 errorDiv.textContent = "Error: " + error.message;
